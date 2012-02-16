@@ -1562,10 +1562,9 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
 
     findSettingsSetup()
 
-    import simples3
     import settings
-
-    s = simples3.S3Bucket( settings.bucket , settings.id , settings.key )
+    settings_file = os.path.abspath(settings.__file__)
+    bucket_name = getattr(settings, 'bucket', 'build-push-testing')
 
     if remoteName is None:
         remoteName = localName
@@ -1585,12 +1584,13 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
     elif platformDir:
         name = platform + "/" + name
 
-    print( "uploading " + localName + " to http://s3.amazonaws.com/" + s.name + "/" + name )
-    if dontReplacePackage:
-        for ( key , modify , etag , size ) in s.listdir( prefix=name ):
+    print( "uploading " + localName + " to http://s3.amazonaws.com/" + bucket_name + "/" + name )
+    if True or dontReplacePackage:
+        if utils.run_s3tool(settings_file, bucket_name, 'exists', name):
             print( "error: already a file with that name, not uploading" )
             Exit(2)
-    s.put( name  , open( localName , "rb" ).read() , acl="public-read" );
+
+    utils.run_s3tool(settings_file, bucket_name, 'put', localName, name)
     print( "  done uploading!" )
 
 def s3shellpush( env , target , source ):
