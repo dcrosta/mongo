@@ -1562,23 +1562,32 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
 
     findSettingsSetup()
 
-    import settings
-    settings_file = os.path.abspath(settings.__file__)
-    bucket_name = getattr(settings, 'bucket', 'build-push-testing')
+    try:
+        import settings
+        settings_file = os.path.abspath(settings.__file__)
+    except ImportError:
+        print "could not find settings.py, not attempting push"
+        Exit(2)
 
-    if remoteName is None:
+    try:
+        bucket_name = settings.bucket
+    except:
+        print "no bucket defined in settings.py, not attempting push"
+        Exit(2)
+
+    if not remoteName:
         remoteName = localName
 
     if fixName:
-        (root,dot,suffix) = _rpartition( localName, "." )
+        root, suffix = os.path.splitext(localName)
         name = remoteName + "-" + getSystemInstallName()
         name += remotePrefix
-        if dot == "." :
+        if suffix:
             name += "." + suffix
         name = name.lower()
     else:
         name = remoteName
-        
+
     if isDriverBuild():
         name = "cxx-driver/" + name
     elif platformDir:
@@ -1593,6 +1602,7 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
     if not utils.run_s3tool(settings_file, bucket_name, 'put', localName, name):
         print( "error: could not put '%s' to s3 as '%s'" % (localName, name) )
         Exit(2)
+
     print( "  done uploading!" )
 
 def s3shellpush( env , target , source ):
