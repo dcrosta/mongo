@@ -1585,12 +1585,12 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
         name = platform + "/" + name
 
     print( "uploading " + localName + " to http://s3.amazonaws.com/" + bucket_name + "/" + name )
-    if True or dontReplacePackage:
+    if dontReplacePackage:
         if utils.run_s3tool(settings_file, bucket_name, 'exists', name):
             print( "error: already a file with that name, not uploading" )
             Exit(2)
 
-    if utils.run_s3tool(settings_file, bucket_name, 'put', localName, name) != 0:
+    if not utils.run_s3tool(settings_file, bucket_name, 'put', localName, name):
         print( "error: could not put '%s' to s3 as '%s'" % (localName, name) )
         Exit(2)
     print( "  done uploading!" )
