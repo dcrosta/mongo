@@ -1582,8 +1582,8 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
         root, suffix = os.path.splitext(localName)
         name = remoteName + "-" + getSystemInstallName()
         name += remotePrefix
-        if suffix:
-            name += "." + suffix
+        # "suffix" contains the dot, if any, or is an empty string
+        name += suffix
         name = name.lower()
     else:
         name = remoteName
