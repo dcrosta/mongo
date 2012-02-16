@@ -1590,7 +1590,9 @@ def s3push( localName , remoteName=None , remotePrefix=None , fixName=True , pla
             print( "error: already a file with that name, not uploading" )
             Exit(2)
 
-    utils.run_s3tool(settings_file, bucket_name, 'put', localName, name)
+    if utils.run_s3tool(settings_file, bucket_name, 'put', localName, name) != 0:
+        print( "error: could not put '%s' to s3 as '%s'" % (localName, name) )
+        Exit(2)
     print( "  done uploading!" )
 
 def s3shellpush( env , target , source ):
